@@ -1,13 +1,5 @@
-# Reference
+## What is Emprest?
+Emprest is my personal project made to study automated tests and the SOLID concept together. It is a basic banking system, with three different banks (for now), and some features that will be shown soon. 
 
-## Table of actions: Client
-|Code| Function |
-|--|--|
-| `createNewAccount(string $accountCode, string $password): void` | Creates a new Account.|
-| `deposit(string $account, int $amount): void` | Deposits the specified value in the specified account. |
-| `purchaseLoan(string $account, int $amount, string $plan):  void` | Got a loan with the specified value. The portions and interest are seleted by the specified plan. |
-| `checkLoanAmount(string $account):  int|false` | If there is an active Loan, returns the value of it.|
-| `checkPortionsPrice(string $account):  int` | Returns the value of each portion. |
-| `enter checkRemainedPortions(string $account):  intcode here` | Returns how many portions you have to pay in the moment.|
-| `getAccount(string $accountCode, string $password):  Account|false` | Returns the specified Account object. |
-| `getName():  string` | Returns the Client  name.|
+### Why create Emprest?
+Long story short, to show and to pratice. I´m a student from the brazillian online school Alura, to reach my first job and in the future become a Teacher. To do that, I think the best way is always pratice, so this is why all these projects are in my public repository. 
