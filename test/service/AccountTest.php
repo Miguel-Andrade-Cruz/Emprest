@@ -1,71 +1,103 @@
 <?php
+
 namespace minuz\emprest\test\service;
 
-use minuz\emprest\model\Account;
-use minuz\emprest\model\BankEmprest;
-use minuz\emprest\model\Client;
-
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\Attributes\DataProviderExternal;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+use minuz\emprest\model\Accounts\Concept\Account;
+use minuz\emprest\model\Clients\Client;
+use minuz\emprest\model\Banks\Structure\Bank;
+use minuz\emprest\model\Banks\Banks\{
+    BankEmprest,
+    NoBank,
+    Itayou
+};
 
 
 final class AccountTest extends TestCase
-{    
-    #[DataProviderExternal(PaymentPortionTestData::class, 'additionProvider')]
-    public function testPortionToPay($portion, $expected)
-    {
-        $this->assertEquals($expected, $portion);
-    }
-    
-
-    
-    #[DataProviderExternal(AccountBalanceTestData::class, 'additionProvider')]
-    public function testAccountBalance($accountToCheck, $anotherAccount, $recieving, $paying, $expected)
-    {
-        $anotherAccount->transfer($accountToCheck, $recieving, "123123");
-        $accountToCheck->transfer($anotherAccount, $paying, "123123");
-        
-        $this->assertEquals($expected, $accountToCheck->checkBalance());
-    }
-}
-
-
-
-
-final class PaymentPortionTestData
 {
-    public static function additionProvider(): array
+    private static Bank $Bank;
+    private static string $cardCode;
+    private static string $password;
+
+    public function tearDown(): void
     {
-        $ana = new Client("Ana", BankEmprest::createAccount("Ana", "111", "123123"));
-        $alan = new Client("Alan", BankEmprest::createAccount("Alan", "222", "123123"));
-        $roy = new Client("Roy", BankEmprest::createAccount("Roy", "333", "123123"));
+        self::$Bank->closeAccount(self::$cardCode, self::$password);
+    }
+    
+    
+    #[DataProvider('bankDepositsDataProvider')]
+    public function testDeposits($bank, $cardCode, $password, $value, $expectedValue)
+    {
+        $client = new Client("Client");
+        $client->openAccount("Title", "abc", "Poupança", $bank);
         
-        $ana->purchaseLoan("111", 4000, "Soft plan");
-        $alan->purchaseLoan("222", 12000, "Medium plan");
-        $roy->purchaseLoan("333", 700, "Pricy plan");
+        $acc = $client->acessAccount("Title", $cardCode, $password);
+
+        self::$Bank = $bank;
+        self::$cardCode = $cardCode;
+        self::$password = $password;
+        
+        $acc->deposit($password, $value);
+
+        $this->assertEquals($expectedValue, $acc->viewBudget($password));
+    }
+
+
+
+    #[DataProvider('bankDraftsDataProvider')]
+    public function testDrafts($bank, $cardCode, $password, $value, $expectedValue)
+    {
+        $client = new Client("Client");
+        $client->openAccount("Title", $password, "Poupança", $bank);
+        
+        $acc = $client->acessAccount("Title", $cardCode, $password);
+
+        self::$Bank = $bank;
+        self::$cardCode = $cardCode;
+        self::$password = $password;
+        
+        $acc->draft($password, $value);
+
+        $this->assertEquals($expectedValue, $acc->viewBudget($password));
+    }
+
+
+
+    public static function bankDepositsDataProvider(): array
+    {
 
         return [
-            "Soft plan test" => [$ana->checkPortionsPrice("111"), 400],
-            "Medium plan test" => [$alan->checkPortionsPrice("222"), 2100],
-            "Pricy plan test" => [$roy->checkPortionsPrice("333"), 280]
+            "BankEmprest account int value" => [new BankEmprest, "07-0001", "abc", 200, 200],
+            "NoBank account int value"      => [new NoBank, "02-0001", "abc", 200, 200],
+            "Itayou account int value"      => [new Itayou, "09-0001", "abc", 200, 200],
+
+            "BankEmprest account float value" => [new BankEmprest, "07-0001", "abc", 10.15, 10.15],
+            "NoBank account float value"      => [new NoBank, "02-0001", "abc", 10.15, 10.15],
+            "Itayou account float value"      => [new Itayou, "09-0001", "abc", 10.15, 10.15],
+
+            "BankEmprest account multiple decimals" => [new BankEmprest, "07-0001", "abc", 2.232524, 2.23],
+            "NoBank account multiple decimals"      => [new NoBank, "02-0001", "abc", 2.232524, 2.23],
+            "Itayou account multiple decimals"      => [new Itayou, "09-0001", "abc", 2.232524, 2.23],
+        ];
+    }
+
+
+
+    public static function bankDraftsDataProvider(): array
+    {
+        return [
+            "Draft BankEmprest account int value" => [new BankEmprest, "07-0001", "abc", 200, -200],
+            "Draft Itayou account int value"      => [new Itayou, "09-0001", "abc", 200, -200],
+
+            "Draft BankEmprest account float value" => [new BankEmprest, "07-0001", "abc", 10.15, -10.15],
+            "Draft NoBank account float value"      => [new NoBank, "02-0001", "abc", 10.15, -10.15],
+            "Draft Itayou account float value"      => [new Itayou, "09-0001", "abc", 10.15, -10.15],
+
+            "Draft BankEmprest account multiple decimals" => [new BankEmprest, "07-0001", "abc", 2.232524, -2.23],
+            "Draft NoBank account multiple decimals"      => [new NoBank, "02-0001", "abc", 2.232524, -2.23],
+            "Draft Itayou account multiple decimals"      => [new Itayou, "09-0001", "abc", 2.232524, -2.23],
         ];
     }
 }
-
-
-final class AccountBalanceTestData
-{
-    public static function additionProvider(): array
-    {
-        $alan = new Client("Alan", BankEmprest::createAccount("Alan", "111", "123123"));        
-        $ana = new Client("Ana", BankEmprest::createAccount("Ana", "222", "123123"));
-        
-        return [
-            "First transaction" => [$alan->getAccount("111", "123123"), $ana->getAccount("222", "123123"), 250, 200, 50],
-            "Second transaction" => [$alan->getAccount("111", "123123"), $ana->getAccount("222", "123123"), 4300, 4000, 350],
-            "Third transaction" => [$alan->getAccount("111", "123123"), $ana->getAccount("222", "123123"), 100, 0, 450]
-        ];
-    }
-}
-
-
