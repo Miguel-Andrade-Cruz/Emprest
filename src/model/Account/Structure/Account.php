@@ -2,9 +2,7 @@
 
 namespace minuz\emprest\model\Accounts\Structure;
 
-use minuz\emprest\model\Banks\Safety\AcessValidator;
-use minuz\emprest\model\Accounts\Concept\AccountAbstraction;
-use minuz\emprest\model\Banks\Concept\Bank;
+use minuz\emprest\model\Account\Concept\AccountAbstraction;
 
 abstract class Account implements AccountAbstraction
 {

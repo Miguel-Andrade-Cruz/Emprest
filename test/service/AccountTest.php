@@ -7,13 +7,13 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 use minuz\emprest\model\Accounts\Concept\Account;
 use minuz\emprest\model\Clients\Client;
-use minuz\emprest\model\Banks\Structure\Bank;
-use minuz\emprest\model\Banks\Banks\{
+use minuz\emprest\model\Banks\Structure\static;
+use minuz\emprest\model\Banks\BanksData\{
     BankEmprest,
     NoBank,
     Itayou
 };
-
+use minuz\emprest\model\Banks\Structure\Bank;
 
 final class AccountTest extends TestCase
 {
@@ -69,17 +69,17 @@ final class AccountTest extends TestCase
     {
 
         return [
-            "BankEmprest account int value" => [new BankEmprest, "07-0001", "abc", 200, 200],
-            "NoBank account int value"      => [new NoBank, "02-0001", "abc", 200, 200],
-            "Itayou account int value"      => [new Itayou, "09-0001", "abc", 200, 200],
+            "BankEmprest account int value" => [new static(BankEmprest::transferData()), "07-0001", "abc", 200, 200],
+            "NoBank account int value"      => [new static(NoBank::transferData()), "02-0001", "abc", 200, 200],
+            "Itayou account int value"      => [new static(Itayou::transferData()), "09-0001", "abc", 200, 200],
 
-            "BankEmprest account float value" => [new BankEmprest, "07-0001", "abc", 10.15, 10.15],
-            "NoBank account float value"      => [new NoBank, "02-0001", "abc", 10.15, 10.15],
-            "Itayou account float value"      => [new Itayou, "09-0001", "abc", 10.15, 10.15],
+            "BankEmprest account float value" => [new static(BankEmprest::transferData()), "07-0001", "abc", 10.15, 10.15],
+            "NoBank account float value"      => [new static(NoBank::transferData()), "02-0001", "abc", 10.15, 10.15],
+            "Itayou account float value"      => [new static(Itayou::transferData()), "09-0001", "abc", 10.15, 10.15],
 
-            "BankEmprest account multiple decimals" => [new BankEmprest, "07-0001", "abc", 2.232524, 2.23],
-            "NoBank account multiple decimals"      => [new NoBank, "02-0001", "abc", 2.232524, 2.23],
-            "Itayou account multiple decimals"      => [new Itayou, "09-0001", "abc", 2.232524, 2.23],
+            "BankEmprest account multiple decimals" => [new static(BankEmprest::transferData()), "07-0001", "abc", 2.232524, 2.23],
+            "NoBank account multiple decimals"      => [new static(NoBank::transferData()), "02-0001", "abc", 2.232524, 2.23],
+            "Itayou account multiple decimals"      => [new static(Itayou::transferData()), "09-0001", "abc", 2.232524, 2.23],
         ];
     }
 
@@ -88,16 +88,17 @@ final class AccountTest extends TestCase
     public static function bankDraftsDataProvider(): array
     {
         return [
-            "Draft BankEmprest account int value" => [new BankEmprest, "07-0001", "abc", 200, -200],
-            "Draft Itayou account int value"      => [new Itayou, "09-0001", "abc", 200, -200],
+            "Draft BankEmprest account int value" => [new static(BankEmprest::transferData()), "07-0001", "abc", 200, -200],
+            "Draft NoBank account int value"      => [new static(NoBank::transferData()), "02-0001", "abc", 200, -200],
+            "Draft Itayou account int value"      => [new static(Itayou::transferData()), "09-0001", "abc", 200, -200],
 
-            "Draft BankEmprest account float value" => [new BankEmprest, "07-0001", "abc", 10.15, -10.15],
-            "Draft NoBank account float value"      => [new NoBank, "02-0001", "abc", 10.15, -10.15],
-            "Draft Itayou account float value"      => [new Itayou, "09-0001", "abc", 10.15, -10.15],
+            "Draft BankEmprest account float value" => [new static(BankEmprest::transferData()), "07-0001", "abc", 10.15, -10.15],
+            "Draft NoBank account float value"      => [new static(NoBank::transferData()), "02-0001", "abc", 10.15, -10.15],
+            "Draft Itayou account float value"      => [new static(Itayou::transferData()), "09-0001", "abc", 10.15, -10.15],
 
-            "Draft BankEmprest account multiple decimals" => [new BankEmprest, "07-0001", "abc", 2.232524, -2.23],
-            "Draft NoBank account multiple decimals"      => [new NoBank, "02-0001", "abc", 2.232524, -2.23],
-            "Draft Itayou account multiple decimals"      => [new Itayou, "09-0001", "abc", 2.232524, -2.23],
+            "Draft BankEmprest account multiple decimals" => [new static(BankEmprest::transferData()), "07-0001", "abc", 2.232524, -2.23],
+            "Draft NoBank account multiple decimals"      => [new static(NoBank::transferData()), "02-0001", "abc", 2.232524, -2.23],
+            "Draft Itayou account multiple decimals"      => [new static(Itayou::transferData()), "09-0001", "abc", 2.232524, -2.23],
         ];
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace minuz\emprest\model\Accounts;
+namespace minuz\emprest\model\Account\Derivatives\InvestAccount;
 
 use minuz\emprest\model\Accounts\Structure\Account;
 use minuz\emprest\model\Loans\Loan;
@@ -12,7 +12,6 @@ class InvestAccount extends Account
     protected string $password;
 
     protected float $budget = 0;
-    protected Loan|false $loan = false;
 
 
 

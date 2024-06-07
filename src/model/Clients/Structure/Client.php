@@ -2,12 +2,13 @@
 
 namespace minuz\emprest\model\Clients;
 
-use minuz\emprest\model\Banks\Structure\Bank;
 use DomainException;
-use minuz\emprest\model\Accounts\Interface\{
+use minuz\emprest\model\Interface\{
     InvestAccountInterface,
     SavingsAccountInterface
 };
+use minuz\emprest\model\Banks\Structure\Bank;
+
 class Client
 {
 
@@ -41,5 +42,18 @@ class Client
         $account->acessAccount($cardCode, $password);
         
         return $account;
+    }
+    
+    
+    public function shareTranferenceData(string $title, string $password): array
+    {
+        if (! array_key_exists($title, $this->myAccounts)) {
+            throw new DomainException("Acesso negado: Essa conta não existe.");
+        }
+
+        $account = $this->myAccounts[$title];
+        $tranferenceData = $account->shareTransferenceData($password);
+
+        return $tranferenceData;
     }
 }

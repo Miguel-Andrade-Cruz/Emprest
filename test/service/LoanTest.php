@@ -2,14 +2,14 @@
 
 namespace minuz\emprest\test\service;
 
-use minuz\emprest\model\Banks\Structure\Bank;
+use minuz\emprest\model\Banks\Structure\static;
 use minuz\emprest\model\Clients\Client;
-use minuz\emprest\model\Banks\Banks\{
+use minuz\emprest\model\Banks\BanksData\{
     BankEmprest,
     NoBank,
     Itayou
 };
-
+use minuz\emprest\model\Banks\Structure\Bank;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -23,7 +23,7 @@ class LoanTest extends TestCase
 
 
     #[DataProvider('additionProvider')]
-    public function testVerifyLoansInfo($bank, $cardCode, $password, $loan)
+    public function testVerifyLoansInfo($bank, $cardCode, $password, $loan, $expected)
     {
         self::$Bank = $bank;
         self::$cardCode = $cardCode;
@@ -33,8 +33,11 @@ class LoanTest extends TestCase
         $client->openAccount("Title", $password, "Poupança", $bank);
         
         $acc = $client->acessAccount("Title", $cardCode, $password);
-        $acc->takeLoan($password, $loan);
+        
+        $acc->takeLoan($password, $loan, "Pricy plan");
 
+
+        $this->assertEquals($expected, $acc->viewLoan($password)["Amount"]);
     }
     
     
@@ -50,9 +53,9 @@ class LoanTest extends TestCase
     public static function additionProvider(): array
     {
         return [
-            "BankEmprest" => [new BankEmprest, "07-0001", "abc", 200],
-            "NoBank" => [new NoBank, "02-0001", "abc", 200],
-            "Itayou" => [new Itayou, "09-0001", "abc", 200],
+            "BankEmprest" => [new static(BankEmprest::transferData()), "07-0001", "abc", 2_000, 3_200],
+            "NoBank" => [new static(NoBank::transferData()), "02-0001", "abc", 2_000, 2_799.97, ],
+            "Itayou" => [new static(Itayou::transferData()), "09-0001", "abc", 2_000, 3_400],
         ];
     }
 
