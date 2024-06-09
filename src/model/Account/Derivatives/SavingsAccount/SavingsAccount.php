@@ -1,8 +1,8 @@
 <?php
 namespace minuz\emprest\model\Account\Derivatives\SavingsAccount;
 
-use minuz\emprest\model\Accounts\Structure\Account;
-use minuz\emprest\model\Loans\Loan\Structure\Loan;
+use minuz\emprest\model\Account\Structure\Account;
+use minuz\emprest\model\Loan\Structure\Loan;
 
 class SavingsAccount extends Account {
 
@@ -31,7 +31,7 @@ class SavingsAccount extends Account {
 
 
 
-    public function viewLoanStatus(): array
+    public function viewLoanStatus(): string
     {
         return $this->loan->viewLoanStatus();
     }

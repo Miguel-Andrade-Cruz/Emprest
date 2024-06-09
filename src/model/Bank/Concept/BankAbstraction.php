@@ -1,6 +1,6 @@
 <?php
 
-namespace minuz\emprest\model\Banks\Concept;
+namespace minuz\emprest\model\Bank\Concept;
 
 interface BankAbstraction
 {

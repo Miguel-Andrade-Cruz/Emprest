@@ -2,11 +2,16 @@
 
 namespace minuz\emprest\model\Bank\Structure;
 
-use minuz\emprest\model\Banks\Concept\BankAbstraction;
-use minuz\emprest\model\Banks\Manager\Manager;
-use minuz\emprest\model\Accounts\Structure\Account;
-use minuz\emprest\model\Accounts\{SavingsAccount, InvestAccount};
+use minuz\emprest\model\Bank\Concept\BankAbstraction;
+use minuz\emprest\model\Manager\Structure\Manager;
+use minuz\emprest\model\Account\Structure\Account;
 
+use minuz\emprest\model\Account\Derivatives\{
+    
+    SavingsAccount\SavingsAccount,
+    INvestAccount\InvestAccount
+};
+use minuz\emprest\model\LoanService\Structure\LoanService;
 
 abstract class Bank implements BankAbstraction
 {
@@ -15,9 +20,9 @@ abstract class Bank implements BankAbstraction
     protected static float $Safe;
     public static array $LoanPlans;
     protected static Manager $Manager;
+    protected static LoanService $loanService;
 
-
-    public function __construct(array $BankData)
+    public function __construct()
     {
 
     }
@@ -148,7 +153,7 @@ abstract class Bank implements BankAbstraction
 
 
 
-    public function viewLoanStatus(string $cardCode, string $password): array
+    public function viewLoanStatus(string $cardCode, string $password): string
     {
         $account = $this->Auth($cardCode, $password);
         

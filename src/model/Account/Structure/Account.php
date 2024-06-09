@@ -1,6 +1,6 @@
 <?php
 
-namespace minuz\emprest\model\Accounts\Structure;
+namespace minuz\emprest\model\Account\Structure;
 
 use minuz\emprest\model\Account\Concept\AccountAbstraction;
 

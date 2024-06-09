@@ -2,14 +2,14 @@
 
 namespace minuz\emprest\model\Manager\Structure;
 
-use minuz\emprest\model\Accounts\Structure\Account;
+use minuz\emprest\model\Interface\Derivatives\{
+    
+    SavingsInterface\SavingsInterface,
+    InvestInterface\InvestInterface
+};
+use minuz\emprest\model\Account\Structure\Account;
 use minuz\emprest\model\Bank\Structure\Bank;
 
-use minuz\emprest\model\Interface\Derivatives{
-
-    SavingsAccountInterface\SavingsAccountInterface,
-    InvestAccountInterface\InvestAccountInterface
-};
 use minuz\emprest\model\Account\Derivatives\{
     
     SavingsAccount\SavingsAccount,
@@ -21,15 +21,23 @@ class Manager
 {
     protected string $BANK_ID;
     protected Bank $BankService;
+    protected $bankSavingsInterface;
+    protected $bankInvestInterface;
 
     protected array $Vault = [];
     protected int $nextAccountCode = 0;
 
 
-    public function __construct(Bank $BankService, string $BANK_ID,)
-    {
+    public function __construct(
+        Bank $BankService,
+        string $BANK_ID,
+        $bankSavingsInterface,
+        $bankInvestInterface
+    ) {
         $this->BankService = $BankService;
         $this->BANK_ID = $BANK_ID;
+        $this->bankSavingsInterface = $bankSavingsInterface;
+        $this->bankInvestInterface = $bankInvestInterface;
     }
 
 
@@ -66,13 +74,13 @@ class Manager
 
 
 
-    public function openAccount(string $title, string $password, string $accountPlan): SavingsAccountInterface|InvestAccountInterface
+    public function openAccount(string $title, string $password, string $accountPlan): SavingsInterface|InvestInterface
     {
         $cardCode = $this->BANK_ID . "-" . sprintf("%'.04d", $this->nextAccountCode +1);
 
         if ($accountPlan == "Poupança") {
             $account = new SavingsAccount($title, $password, $cardCode);
-            $interface = new SavingsAccountInterface($this->BankService, $cardCode, $title);
+            $interface = new $this->bankSavingsInterface($title, $cardCode, $this->BankService);
             
             $this->Vault[$cardCode] = $account;
             $this->nextAccountCode = count($this->Vault);
@@ -81,7 +89,7 @@ class Manager
         }
         else if ($accountPlan == "Investimento") {
             $account = new InvestAccount($title, $password, $cardCode);
-            $interface = new InvestAccountInterface($this->BankService, $cardCode, $title);
+            $interface = new $this->bankInvestInterface($title, $cardCode, $this->BankService);
             
             $this->Vault[$cardCode] = $account;
             $this->nextAccountCode = count($this->Vault);
