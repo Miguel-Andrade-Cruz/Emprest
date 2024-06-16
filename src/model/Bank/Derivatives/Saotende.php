@@ -2,33 +2,49 @@
 
 namespace minuz\emprest\model\Bank\Derivatives;
 
-use minuz\emprest\model\Manager\Structure\Manager;
+// Bank
 use minuz\emprest\model\Bank\Structure\Bank;
 
-use minuz\emprest\model\Interface\Derivatives\{
-    
-    InvestInterface\InvestInterface,
-    SavingsInterface\SavingsInterface
-};
-use minuz\emprest\model\LoanService\Derivatives\MonthLoanService;
-use minuz\emprest\model\LoanService\Derivatives\ValueLoanService;
+// Manager
+use minuz\emprest\model\Manager\Structure\Manager;
+
+// LoanService
+use minuz\emprest\model\LoanService\Derivatives\Default\ValueLoanService;
 use minuz\emprest\model\LoanService\Structure\LoanService;
 
-final class Saotende extends Bank
-{
-    protected static string $BANK_ID = "05";
-    protected static Manager $Manager;
-    protected static float $Safe = 200_000_000;
-    protected static LoanService $loanService;
-    protected static $bankSavingsInterface = SavingsInterface::class;
-    protected static $bankInvestInterface = InvestInterface::class;
+// Account
+use minuz\emprest\model\Account\Derivatives\Default\{
     
+    SavingsAccount,
+    InvestAccount
+};
+use minuz\emprest\model\Bank\Concept\BankAbstraction;
+// Interface
+use minuz\emprest\model\Interface\Derivatives\Default\{
+    
+    InvestInterface,
+    SavingsInterface
+};
+
+
+final class Saotende extends Bank implements BankAbstraction
+{
+    const BANK_ID = "09";
+    
+    protected static array $SafeBox = [];
+    protected static float $Vault = 25_00_000;
+
+    protected static int $nextAccountCode = 0;
+
+    protected static array $bankAccounts = ["Savings" => SavingsAccount::class, "Invest" => InvestAccount::class];
+    protected static array $bankInterfaces = ["Savings" => SavingsInterface::class, "Invest" => InvestInterface::class];
+
 
 
 
     public function __construct()
     {
-        self::$Manager = new Manager($this, self::$BANK_ID, self::$bankSavingsInterface , self::$bankInvestInterface);
-        self::$loanService = new ValueLoanService(0.01, 6);
+        
     }
+
 }

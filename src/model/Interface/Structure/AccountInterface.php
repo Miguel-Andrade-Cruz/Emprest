@@ -2,18 +2,20 @@
 
 namespace minuz\emprest\model\Interface\Structure;
 
-use DomainException;
-use minuz\emprest\model\Bank\Structure\Bank;
+use minuz\emprest\model\Bank\Concept\BankAbstraction;
+use minuz\emprest\model\Bank\Structure\LoanbleBank;
+use minuz\emprest\model\Bank\Concept\PayOffFeature;
+use minuz\emprest\model\Interface\Concept\AccountInterfaceAbstraction;
 
-abstract class AccountInterface
+abstract class AccountInterface implements AccountInterfaceAbstraction
 {
     protected string $title;
     protected string $cardCode;
-    protected Bank $Bank;
+    protected BankAbstraction|LoanbleBank|PayOffFeature $Bank;
 
 
 
-    public function __construct(string $title, string $cardCode, Bank $Bank)
+    public function __construct(string $title, string $cardCode, BankAbstraction|LoanbleBank|PayOffFeature $Bank)
     {
         $this->title = $title;
         $this->cardCode = $cardCode;
@@ -39,6 +41,23 @@ abstract class AccountInterface
     }
 
 
+    public function shareTransferenceCode(string $password): array
+    {
+        if ( ! $this->Bank->allowClientAcess($this->cardCode, $password) ) {
+        
+            throw new \DomainException("Erro: Acesso inválido.");
+        }
+
+        return ["Bank ID" => $this->Bank, "Account code" => $this->cardCode];
+    }
+
+
+    public function tranference(string $password, array $transferecncedata, float $value): void
+    {
+        $this->Bank->transference($this->cardCode, $password, $transferecncedata, $value);
+    }
+
+
 
     public function viewBudget(string $password): float
     {
@@ -53,6 +72,6 @@ abstract class AccountInterface
             return $this;
         }
 
-        throw new DomainException("Erro: Tentativa de acesso a conta invalido.");
+        throw new \DomainException("Erro: Acesso invalido.");
     }
 }

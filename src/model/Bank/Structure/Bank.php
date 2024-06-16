@@ -2,62 +2,141 @@
 
 namespace minuz\emprest\model\Bank\Structure;
 
+// Bank
 use minuz\emprest\model\Bank\Concept\BankAbstraction;
 use minuz\emprest\model\Manager\Structure\Manager;
-use minuz\emprest\model\Account\Structure\Account;
 
-use minuz\emprest\model\Account\Derivatives\{
-    
-    SavingsAccount\SavingsAccount,
-    INvestAccount\InvestAccount
+// Account
+use minuz\emprest\model\Account\Structure\Account;
+use minuz\emprest\model\Account\Derivatives\Default\SavingsAccount;
+use minuz\emprest\model\Account\Derivatives\Default\InvestAccount;
+use minuz\emprest\model\Interface\Concept\AccountInterfaceAbstraction;
+// Interface
+use minuz\emprest\model\Interface\Derivatives\Default\{
+    InvestInterface,
+    SavingsInterface
 };
-use minuz\emprest\model\LoanService\Structure\LoanService;
 
 abstract class Bank implements BankAbstraction
 {
-    protected static string $BANK_ID;
+    const BANK_ID = "XX";
     
-    protected static float $Safe;
-    public static array $LoanPlans;
-    protected static Manager $Manager;
-    protected static LoanService $loanService;
+    protected static array $SafeBox = [];
+    protected static float $Vault = 0;
 
-    public function __construct()
+    protected static int $nextAccountCode = 0;
+
+    protected static array $bankAccounts = ["Savings" => SavingsAccount::class, "Invest" => InvestAccount::class];
+    protected static array $bankInterfaces = ["Savings" => SavingsInterface::class, "Invest" => InvestInterface::class];
+
+
+
+    protected function Auth(string $cardCode, string $password): SavingsAccount|InvestAccount|false
     {
-
-    }
-
-
-
-    public function openAccount(string $title, string $password, $accountPlan)
-    {
-        return static::$Manager->openAccount($title, $password, $accountPlan);
-    }
-
-
-
-    public function closeAccount(string $cardCode, string $password): void
-    {
-        static::$Manager->closeAccount($cardCode, $password);
-    }
-
-
-
-    protected function Auth(string $cardCode, string $password): SavingsAccount|InvestAccount
-    {
-        $account = static::$Manager->acessAccount($cardCode);
+        if (! array_key_exists($cardCode, static::$SafeBox)) {
+        
+            return false;
+        }
+        
+        $account = static::$SafeBox[$cardCode];
         $account->validate($password);
-
+        
         return $account;
     }
 
 
 
-    protected function internalTranference(Account $account, string $destinyAccountID, float $value): void
+    protected function searchAccount(string $cardCode): SavingsAccount|InvestAccount
     {
-        $destinyAccount = static::$Manager->acessAccount($destinyAccountID);
+        if ( ! array_key_exists($cardCode, static::$SafeBox) ) {
+        
+            throw new \DomainException("Conta a transferir não encontrada.");
+        }
+        $account = static::$SafeBox[$cardCode];
+        
+        return $account;
+    }
+
+
+
+    public function allowClientAcess(string $cardCode, string $password): bool
+    {
+        if ( ! $this->Auth($cardCode, $password) ) {
+
+            return false;
+        }
+        return true;
+    }
+
+
+
+    public function openAccount(string $title, string $password, string $accountPlan): AccountInterfaceAbstraction
+    {
+        $cardCode = static::BANK_ID . "-" . sprintf("%'.04d", ++static::$nextAccountCode);
+
+        return match ($accountPlan) {
+
+            "Poupança" => $this->openSavingsAccount($title, $password, $cardCode),
+            
+            "Investimento" => $this->openInvestAccount($title, $password, $cardCode),
+            
+            default => throw new \DomainException("Criação de conta cancelada: Plano de conta inválido.")
+        };
+    }
+
+
+
+
+    private function openSavingsAccount(string $title, string $password, string $cardCode): AccountInterfaceAbstraction
+{
+    $accountType = static::$bankAccounts["Savings"];
+    $interfaceType = static::$bankInterfaces["Savings"];
+    
+    $account = new $accountType($title, $password, $cardCode);
+    $interface = new $interfaceType($title, $cardCode, $this);
+    
+    static::$SafeBox[$cardCode] = $account;
+    
+    return $interface;
+}
+
+
+private function openInvestAccount(string $title, string $password, string $cardCode): AccountInterfaceAbstraction
+{
+    $accountType = static::$bankAccounts["Invest"];
+    $interfaceType = static::$bankInterfaces["Invest"];
+    
+    $account = new $accountType($title, $password, $cardCode);
+    $interface = new $interfaceType($title, $cardCode, $this);
+    
+    static::$SafeBox[$cardCode] = $account;
+    
+    return $interface;
+}
+
+
+
+public function closeAccount(string $cardCode, string $password): void
+{
+    if ( ! $this->Auth($cardCode, $password) ) {
+        
+        throw new \DomainException("Cancelamento interrompido: Dados inválidos.");
+    }
+
+    unset(static::$SafeBox[$cardCode]);
+    $this->nextAccountCode--;
+    
+    return;
+}
+
+
+
+    protected function internalTranference(Account $account, string $destinyCardCode, float $value): void
+    {
+        $destinyAccount = $this->searchAccount($destinyCardCode);
         
         $value = round($value, 2);
+
         $account->draft($value);
         $destinyAccount->deposit($value);
         
@@ -79,7 +158,7 @@ abstract class Bank implements BankAbstraction
     
     protected function recieveTransference(string $destinyAccountID, float $value): void
     {
-        $recieveAccount = $this->Manager->acessAccount($destinyAccountID);
+        $recieveAccount = $this->searchAccount($destinyAccountID);
         $recieveAccount->deposit($value);
 
         return;
@@ -87,20 +166,13 @@ abstract class Bank implements BankAbstraction
 
 
 
-    public function allowClientAcess(string $cardCode, string $password): bool
-    {
-        return static::$Manager->allowClientAcess($cardCode, $password);
-    }
-
-
-
     public function transference(string $cardCode, string $password, array $transferenceData, float $value): void
     {
         $account = $this->Auth($cardCode, $password);
-        $destinyAccountID = $transferenceData["Account ID"];
-        $tranferenceBank = $transferenceData["Bank"];
+        $destinyAccountID = $transferenceData["Account code"];
+        $tranferenceBank = $transferenceData["Bank ID"];
         
-        if ($tranferenceBank->BANK_ID != $this->BANK_ID) {
+        if ( static::BANK_ID != $tranferenceBank::BANK_ID ) {
 
             $this->externalTransference($account, $destinyAccountID, $tranferenceBank, $value);
             
@@ -142,33 +214,5 @@ abstract class Bank implements BankAbstraction
 
 
 
-    public function purchaseLoan(string $cardCode, string $password, float $loanValue): void
-    {
-        $account = $this->Auth($cardCode, $password);
 
-        $loan = static::$loanService->newLoan($loanValue);
-
-        $account->applyLoan($loan);
-    }
-
-
-
-    public function viewLoanStatus(string $cardCode, string $password): string
-    {
-        $account = $this->Auth($cardCode, $password);
-        
-        return $account->viewLoanStatus();
-    }
-
-
-
-    public function payPortions(string $cardCode, string $password, int $portionsQtd): void
-    {
-        $account = $this->Auth($cardCode, $password);
-        
-        $portion = $account->payPortions($portionsQtd);
-        $this->Safe += $portion;
-
-        return;
-    }
 }

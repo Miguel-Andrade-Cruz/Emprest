@@ -9,4 +9,6 @@ interface AccountAbstraction
     public function draft(float $value): void;
 
     public function viewBudget(): float;
+
+    public function validate(string $pasword): bool;
 }

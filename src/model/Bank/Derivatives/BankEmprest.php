@@ -2,32 +2,52 @@
 
 namespace minuz\emprest\model\Bank\Derivatives;
 
-use minuz\emprest\model\Manager\Structure\Manager;
-use minuz\emprest\model\Bank\Structure\Bank;
+// Bank
+use minuz\emprest\model\Bank\Structure\LoanbleBank;
+use minuz\emprest\model\Bank\Concept\Loanble;
 
-use minuz\emprest\model\Interface\Derivatives\{
+// Manager
+use minuz\emprest\model\Manager\Structure\Manager;
+
+// Loan Service
+use minuz\emprest\model\LoanService\Derivatives\Default\MonthLoanService;
+
+// Account
+use minuz\emprest\model\Account\Derivatives\Default\{
     
-    InvestInterface\InvestInterface,
-    SavingsInterface\SavingsInterface
+    SavingsAccount,
+    InvestAccount
 };
-use minuz\emprest\model\LoanService\Derivatives\MonthLoanService;
+
+// Interface
+use minuz\emprest\model\Interface\Derivatives\Default\{
+    
+    InvestInterface,
+    SavingsInterface
+};
+use minuz\emprest\model\Loan\Structure\Loan;
 use minuz\emprest\model\LoanService\Structure\LoanService;
 
-final class BankEmprest extends Bank
+final class BankEmprest extends LoanbleBank implements Loanble
 {
-    protected static string $BANK_ID = "07";
-    protected static float $Safe = 10_000_000;
-    protected static Manager $Manager;
-    protected static LoanService $loanService;
-    protected static $bankSavingsInterface = SavingsInterface::class;
-    protected static $bankInvestInterface = InvestInterface::class;
+    const BANK_ID = "03";
     
+    protected static array $SafeBox = [];
+    protected static float $Vault = 10_00_000;
+
+    protected static int $nextAccountCode = 0;
+
+    protected static array $bankAccounts = ["Savings" => SavingsAccount::class, "Invest" => InvestAccount::class];
+    protected static array $bankInterfaces = ["Savings" => SavingsInterface::class, "Invest" => InvestInterface::class];
+
+    protected static LoanService $loanService;
+    protected static string $loanType = Loan::class;
+
 
 
 
     public function __construct()
     {
-        self::$Manager = new Manager($this, self::$BANK_ID, self::$bankSavingsInterface , self::$bankInvestInterface);
-        self::$loanService = new MonthLoanService(0.4, 10);
+        self::$loanService = new MonthLoanService(0.22, 12, self::$loanType);
     }
 }

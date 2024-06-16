@@ -1,17 +1,23 @@
 <?php
-namespace minuz\emprest\model\Account\Derivatives\SavingsAccount;
+namespace minuz\emprest\model\Account\Derivatives\Default;
 
+// Account
+
+use minuz\emprest\model\Account\Concept\AccountAbstraction;
+use minuz\emprest\model\Account\Concept\AllowLoan;
 use minuz\emprest\model\Account\Structure\Account;
-use minuz\emprest\model\Loan\Structure\Loan;
+use minuz\emprest\model\Loan\Concept\LoanAbstraction;
+use minuz\emprest\model\Loan\Concept\PayOffableLoan;
 
-class SavingsAccount extends Account {
+class SavingsAccount extends Account implements AccountAbstraction, AllowLoan
+{
 
     public readonly string $title;
-    protected string $cardCode;
+    protected readonly string $cardCode;
     protected string $password;
 
     protected float $budget = 0;
-    protected Loan|false $loan = false;
+    protected LoanAbstraction|PayOffableLoan|false $loan = false;
 
 
 
@@ -22,7 +28,7 @@ class SavingsAccount extends Account {
 
 
 
-    public function applyLoan(Loan $loan): void
+    public function applyLoan(LoanAbstraction $loan): void
     {
         $this->loan = $loan;
 
@@ -38,7 +44,7 @@ class SavingsAccount extends Account {
 
 
 
-    public function payPortions(int|true $portionsQtd = true): bool
+    public function payPortions(int $portionsQtd): bool
     {
         if ( $this->loan->checkLoan() ) {
 
@@ -46,6 +52,13 @@ class SavingsAccount extends Account {
         }
 
         return $this->loan->payPortions($portionsQtd);
+    }
+
+
+
+    public function acessLoan(): LoanAbstraction|PayOffableLoan
+    {
+        return $this->loan;
     }
 
 

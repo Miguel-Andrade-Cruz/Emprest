@@ -23,14 +23,24 @@ To ensure that your improvement on Emprest will work, Follow the instructions be
  - Create a new account type;
  - Create a new Client type;
 
+## Develop on Emprest
+To ensure that your improvement on Emprest will work, Follow the instructions below to:
+ - Add a new bank;
+ - Create a new account type;
+ - Create a new Client type;
+
 ### Adding a new bank
 
- 1. Go to  src/model/Bank/Derivatives and create a new folder with the name ofyour bank.
+ 1. Go to  src/model/Bank/Derivatives and create a new folder with the name of your bank.
 
  2. Import the classes `Manager` and `Bank` to your file.
 
- 3. Add the `BANK_ID`,  `Manager` and `Safe`  properties.
+ 3. Add the `BANK_ID`,  `loanService`, `Manager` and `Safe`  properties.
  
- 4. Instanciate a `Manager` on the construct method.
+ 4. Instanciate a `Manager` and a `LoanService` on the construct method.
  
  5. Add the new features you want.
+ 
+ 6. Create a new `Account` and `AccountInterface` child classes so the user can acess your new feature.
+ 
+ 7. Overwrite the construct method to implement the new child classes instead of the default classes.

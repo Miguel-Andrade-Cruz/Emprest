@@ -2,24 +2,35 @@
 
 require_once __DIR__ . "../vendor/autoload.php";
 
-use minuz\emprest\model\Bank\Derivatives\{BankEmprest, NoBank, Itayou, Saotende};
+use minuz\emprest\model\Bank\Derivatives\{BankEmprest, NoBank, Itayou, Saotende, Nacional};
 use minuz\emprest\model\Client\Structure\Client;
+
 
 
 $Itayou = new Itayou();
 $Saotende = new Saotende();
+$Nacional = new Nacional();
+
+
 
 $Joao = new Client("João");
 $Maria = new Client("Maria");
+$Pedro = new Client("Pedro");
 
-$Joao->openAccount("Conta", "abc", "Poupança", $Itayou);
-$Maria->openAccount("Title", "qwe", "Poupança", $Saotende);
 
-$contaJoao = $Joao->acessAccount("Conta", "09-0001", "abc");
-$contaMaria = $Maria->acessAccount("Title", "05-0001", "qwe");
+$Pedro->openAccount("Conta do Pedro", "pp", "Poupança", $Nacional);
+$Joao->openAccount("title", "pass", "Poupança", $Itayou);
 
-$contaJoao->purchaseLoan("abc", 2_000);
-$contaMaria->purchaseLoan("qwe", 1_000);
+$contaPedro = $Pedro->acessAccount("Conta do Pedro", "04-0001", "pp");
 
-echo $contaJoao->viewLoanStatus("abc");
-echo $contaMaria->viewLoanStatus("qwe");
+$contaPedro->purchaseLoan('pp', 2_000);
+echo $contaPedro->viewLoanStatus("pp");
+
+
+
+$contaPedro->payOff("pp");
+echo $contaPedro->viewLoanStatus("pp");
+
+
+
+

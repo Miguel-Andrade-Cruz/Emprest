@@ -1,17 +1,18 @@
 <?php
 
-namespace minuz\emprest\model\LoanService\Derivatives;
+namespace minuz\emprest\model\LoanService\Derivatives\Default;
 
 use DateInterval;
 use DateTime;
+use DateTimeImmutable;
 use minuz\emprest\model\LoanService\Concept\LoanServiceAbstraction;
 use minuz\emprest\model\LoanService\Structure\LoanService;
 
 class MonthLoanService extends LoanService implements LoanServiceAbstraction
 {
-    public function __construct(float $interest, int $portionsQtd)
+    public function __construct(float $interest, int $portionsQtd, string $loanType)
     {
-        parent::__construct($interest, $portionsQtd);
+        parent::__construct($interest, $portionsQtd, $loanType);
     }
     
     
@@ -23,17 +24,16 @@ class MonthLoanService extends LoanService implements LoanServiceAbstraction
 
 
 
-    protected function moldPortions(string $purchaseDate, float $amount): array
+    protected function moldPortions(DateTimeImmutable $purchaseDate, float $amount): array
     {
-        $date = new DateTime($purchaseDate);
         $time = new DateInterval("P1M");
         $portions = [];
         
         $portionValue = round($amount / $this->portionsQtd, 2);
-        for ( $i = 0; $i<= $this->portionsQtd; $i++ ) {
-            
-            $nextDate = $date->add($time)->format("d/m/Y");
-            $portions[$nextDate] = $portionValue;
+        
+        for ( $i = 0, $nextDate = $purchaseDate; $i != $this->portionsQtd; $i++ ) {
+            $nextDate = $nextDate->add($time);
+            $portions[$nextDate->format("d/m/Y")] = $portionValue;
         }
 
         return $portions;

@@ -4,10 +4,12 @@ namespace minuz\emprest\model\Client\Structure;
 
 use minuz\emprest\model\Bank\Structure\Bank;
 
-use minuz\emprest\model\Interface\Derivatives\{
+use minuz\emprest\model\Interface\Concept\PayOffInterface;
+
+use minuz\emprest\model\Interface\Derivatives\Default\{
     
-    SavingsInterface\SavingsInterface,
-    InvestInterface\InvestInterface
+    InvestInterface,
+    SavingsInterface
 };
 
 class Client
@@ -32,8 +34,7 @@ class Client
     }
 
 
-    public function acessAccount(string $title, string $cardCode, string $password): SavingsInterface|InvestInterface
-    {
+    public function acessAccount(string $title, string $cardCode, string $password): SavingsInterface|InvestInterface|PayOffInterface   {
         if (! array_key_exists($title, $this->myAccounts)) {
             throw new \DomainException("Acesso negado: Essa conta não existe.");
         }
