@@ -2,35 +2,20 @@
 
 require_once __DIR__ . "../vendor/autoload.php";
 
-use minuz\emprest\model\Bank\Derivatives\{BankEmprest, NoBank, Itayou, Saotende, Nacional};
+use minuz\emprest\model\Bank\Derivatives\Itayou;
 use minuz\emprest\model\Client\Structure\Client;
 
-
-
 $Itayou = new Itayou();
-$Saotende = new Saotende();
-$Nacional = new Nacional();
+
+$Charlie = new Client("Bob");
 
 
-
-$Joao = new Client("João");
-$Maria = new Client("Maria");
-$Pedro = new Client("Pedro");
+$cardCode = $Charlie->openAccount("Charlie's Account", "23232", "Poupança", $Itayou);
+$charlieAccount = $Charlie->acessAccount("Charlie's Account", $cardCode, "23232");
 
 
-$Pedro->openAccount("Conta do Pedro", "pp", "Poupança", $Nacional);
-$Joao->openAccount("title", "pass", "Poupança", $Itayou);
+$charlieAccount->purchaseLoan("23232", 5_000);
 
-$contaPedro = $Pedro->acessAccount("Conta do Pedro", "04-0001", "pp");
+$charlieAccount->payLoanPortions("23232", 2);
 
-$contaPedro->purchaseLoan('pp', 2_000);
-echo $contaPedro->viewLoanStatus("pp");
-
-
-
-$contaPedro->payOff("pp");
-echo $contaPedro->viewLoanStatus("pp");
-
-
-
-
+$charlieAccount->viewLoanStatus("23232"); // Outputs amount, portion date and portion value to pay

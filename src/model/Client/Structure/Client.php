@@ -26,11 +26,13 @@ class Client
     }
 
 
-    public function openAccount(string $title, string $password, string $accountPlan, Bank $Bank): void
+    public function openAccount(string $title, string $password, string $accountPlan, Bank $Bank): string
     {
         $account = $Bank->openAccount($title, $password, $accountPlan);
 
-        $this->myAccounts[$title] = $account;
+        $this->myAccounts[$title] = $account["Object"];
+        
+        return $account["Card code"];
     }
 
 

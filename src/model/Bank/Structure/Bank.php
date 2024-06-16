@@ -70,7 +70,7 @@ abstract class Bank implements BankAbstraction
 
 
 
-    public function openAccount(string $title, string $password, string $accountPlan): AccountInterfaceAbstraction
+    public function openAccount(string $title, string $password, string $accountPlan): array
     {
         $cardCode = static::BANK_ID . "-" . sprintf("%'.04d", ++static::$nextAccountCode);
 
@@ -87,7 +87,7 @@ abstract class Bank implements BankAbstraction
 
 
 
-    private function openSavingsAccount(string $title, string $password, string $cardCode): AccountInterfaceAbstraction
+    private function openSavingsAccount(string $title, string $password, string $cardCode): array
 {
     $accountType = static::$bankAccounts["Savings"];
     $interfaceType = static::$bankInterfaces["Savings"];
@@ -97,11 +97,11 @@ abstract class Bank implements BankAbstraction
     
     static::$SafeBox[$cardCode] = $account;
     
-    return $interface;
+    return ["Object" => $interface, "Card code" => $cardCode];
 }
 
 
-private function openInvestAccount(string $title, string $password, string $cardCode): AccountInterfaceAbstraction
+private function openInvestAccount(string $title, string $password, string $cardCode): array
 {
     $accountType = static::$bankAccounts["Invest"];
     $interfaceType = static::$bankInterfaces["Invest"];
@@ -111,7 +111,7 @@ private function openInvestAccount(string $title, string $password, string $card
     
     static::$SafeBox[$cardCode] = $account;
     
-    return $interface;
+    return ["Object" => $interface, "Card code" => $cardCode];
 }
 
 
